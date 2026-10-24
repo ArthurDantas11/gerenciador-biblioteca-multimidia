@@ -1,7 +1,15 @@
 class Midia:
     """Representa um item genérico de mídia na biblioteca."""
 
-    def __init__(self, titulo: str, caminho_arquivo: str, ano: int, genero: str = "Não informado"):
+    def __init__(
+        self,
+        titulo: str,
+        caminho_arquivo: str,
+        ano: int,
+        genero: str = "Não informado",
+        id: str | None = None,
+    ):
+        self.id = id
         self.titulo = titulo
         self.caminho_arquivo = caminho_arquivo
         self.ano = ano
@@ -12,14 +20,21 @@ class Midia:
         return f"[{self.genero}] {self.titulo} ({self.ano}) -> Local: {self.caminho_arquivo}"
 
     def para_dicionario(self) -> dict:
-        """Converte os dados básicos da mídia em um dicionário para salvar em JSON."""
-        return {
-            "tipo": "Midia",
-            "titulo": self.titulo,
-            "caminho_arquivo": self.caminho_arquivo,
-            "ano": self.ano,
-            "genero": self.genero,
-        }
+        """Converte os dados básicos da mídia em um dicionário."""
+        dados = {}
+        if self.id is not None:
+            dados["id"] = self.id
+
+        dados.update(
+            {
+                "tipo": "Midia",
+                "titulo": self.titulo,
+                "caminho_arquivo": self.caminho_arquivo,
+                "ano": self.ano,
+                "genero": self.genero,
+            }
+        )
+        return dados
 
 
 class Filme(Midia):
@@ -33,8 +48,9 @@ class Filme(Midia):
         diretor: str,
         duracao_minutos: int,
         genero: str = "Não informado",
+        id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
         self.diretor = diretor
         self.duracao_minutos = duracao_minutos
 
@@ -63,8 +79,9 @@ class Serie(Midia):
         temporada: int,
         episodio: int,
         genero: str = "Não informado",
+        id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
         self.temporada = temporada
         self.episodio = episodio
 
@@ -95,8 +112,9 @@ class Musica(Midia):
         album: str,
         duracao_segundos: int,
         genero: str = "Não informado",
+        id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
         self.artista = artista
         self.album = album
         self.duracao_segundos = duracao_segundos
@@ -127,8 +145,9 @@ class Video(Midia):
         canal_ou_autor: str,
         duracao_minutos: int,
         genero: str = "Não informado",
+        id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
         self.canal_ou_autor = canal_ou_autor
         self.duracao_minutos = duracao_minutos
 
@@ -150,6 +169,8 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
     """Reconstrói o objeto correto (Filme, Serie, Musica, Video ou Midia) a partir de um dicionário."""
     tipo = dados.get("tipo", "Midia")
     genero = dados.get("genero", "Não informado")
+    # Se vier do MongoDB, converte o ObjectId (_id) para string; senão usa 'id' se existir
+    id_midia = str(dados["_id"]) if "_id" in dados else dados.get("id")
 
     if tipo == "Filme":
         return Filme(
@@ -159,6 +180,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             diretor=dados["diretor"],
             duracao_minutos=dados["duracao_minutos"],
             genero=genero,
+            id=id_midia,
         )
     elif tipo == "Serie":
         return Serie(
@@ -168,6 +190,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             temporada=dados["temporada"],
             episodio=dados["episodio"],
             genero=genero,
+            id=id_midia,
         )
     elif tipo == "Musica":
         return Musica(
@@ -178,6 +201,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             album=dados["album"],
             duracao_segundos=dados["duracao_segundos"],
             genero=genero,
+            id=id_midia,
         )
     elif tipo == "Video":
         return Video(
@@ -187,6 +211,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             canal_ou_autor=dados["canal_ou_autor"],
             duracao_minutos=dados["duracao_minutos"],
             genero=genero,
+            id=id_midia,
         )
     else:
         return Midia(
@@ -194,5 +219,6 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             caminho_arquivo=dados["caminho_arquivo"],
             ano=dados["ano"],
             genero=genero,
+            id=id_midia,
         )
 

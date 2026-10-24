@@ -1,5 +1,7 @@
 import re
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from pymongo.collation import Collation
 from pymongo.collection import Collection
 
@@ -21,16 +23,22 @@ class GerenciadorBiblioteca:
             midias.append(criar_midia_de_dicionario(documento))
         return midias
 
-    def adicionar_midia(self, midia: Midia) -> None:
-        """Adiciona uma nova mídia à biblioteca após validar seu tipo."""
+    def adicionar_midia(self, midia: Midia) -> str:
+        """Adiciona uma nova mídia à biblioteca após validar seu tipo e retorna o ID gerado."""
         if not isinstance(midia, Midia):
             raise TypeError("O item adicionado precisa ser um objeto do tipo Midia (ou suas subclasses).")
 
-        self.colecao.insert_one(midia.para_dicionario())
+        resultado = self.colecao.insert_one(midia.para_dicionario())
+        midia.id = str(resultado.inserted_id)
+        return midia.id
+
+    def obter_midias(self) -> list[Midia]:
+        """Retorna a lista de objetos de mídia cadastrados no banco."""
+        return self._documentos_para_midias(self.colecao.find())
 
     def listar_midias(self) -> list[str]:
         """Retorna uma lista com os resumos formatados de todas as mídias cadastradas."""
-        midias = self._documentos_para_midias(self.colecao.find())
+        midias = self.obter_midias()
         if not midias:
             return ["A biblioteca está vazia no momento."]
 
@@ -54,5 +62,16 @@ class GerenciadorBiblioteca:
         collation = Collation(locale="pt", strength=2)
         resultado = self.colecao.delete_one({"titulo": titulo.strip()}, collation=collation)
         return resultado.deleted_count > 0
+
+    def remover_por_id(self, id_midia: str) -> bool:
+        """Remove uma mídia específica pelo seu ID único do MongoDB."""
+        try:
+            oid = ObjectId(id_midia.strip())
+        except InvalidId:
+            return False
+
+        resultado = self.colecao.delete_one({"_id": oid})
+        return resultado.deleted_count > 0
+
 
 
