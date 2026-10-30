@@ -4,6 +4,8 @@ Projeto em Python, desenvolvido por etapas para aprendizado, que cataloga filmes
 
 ## Funcionalidades
 
+- Autenticação de usuários com **bcrypt** (hash de senhas) e **JWT** (Bearer Token)
+- Biblioteca individual por usuário na API REST
 - Adicionar mídias dos tipos **Filme**, **Série**, **Música** e **Vídeo**
 - Listar todas as mídias cadastradas
 - Buscar por título (parcial, sem diferenciar maiúsculas e minúsculas)
@@ -40,18 +42,21 @@ Com o servidor rodando, acesse no navegador:
 
 ### Rotas da API
 
-| Método | Rota | Descrição |
-|---|---|---|
-| `GET` | `/` | Verifica se a API está online |
-| `GET` | `/midias` | Lista todas as mídias (ou filtra por título com `?titulo=...`) |
-| `POST` | `/midias` | Cadastra uma nova mídia (`Filme`, `Serie`, `Musica` ou `Video`) |
-| `DELETE` | `/midias/{id_midia}` | Remove uma mídia pelo seu ID único do MongoDB |
+| Método | Rota | Autenticação | Descrição |
+|---|---|---|---|
+| `GET` | `/` | Pública | Verifica se a API está online |
+| `POST` | `/usuarios/registro` | Pública | Cria uma nova conta de usuário |
+| `POST` | `/usuarios/login` | Pública | Autentica o usuário e retorna o Token JWT |
+| `GET` | `/midias` | Bearer Token | Lista as mídias do usuário logado (ou filtra com `?titulo=...`) |
+| `POST` | `/midias` | Bearer Token | Cadastra uma nova mídia vinculada ao usuário logado |
+| `DELETE` | `/midias/{id_midia}` | Bearer Token | Remove uma mídia do usuário logado pelo ID |
 
 ## Estrutura do projeto
 
 | Arquivo | Função |
 |---|---|
-| `api.py` | API REST em FastAPI com validação Pydantic e CORS configurado para Next.js |
+| `api.py` | API REST em FastAPI com autenticação JWT, validação Pydantic e CORS |
+| `auth.py` | Funções de segurança: hash de senhas com `bcrypt` e tokens `JWT` |
 | `main.py` | Ponto de entrada CLI: conexão com o MongoDB e menu de terminal |
 | `manager.py` | Classe `GerenciadorBiblioteca`: adicionar, listar, buscar e remover mídias |
 | `models.py` | Classes `Midia`, `Filme`, `Serie`, `Musica` e `Video`, e conversão entre objetos e dicionários |

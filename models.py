@@ -8,8 +8,10 @@ class Midia:
         ano: int,
         genero: str = "Não informado",
         id: str | None = None,
+        usuario_id: str | None = None,
     ):
         self.id = id
+        self.usuario_id = usuario_id
         self.titulo = titulo
         self.caminho_arquivo = caminho_arquivo
         self.ano = ano
@@ -24,6 +26,8 @@ class Midia:
         dados = {}
         if self.id is not None:
             dados["id"] = self.id
+        if self.usuario_id is not None:
+            dados["usuario_id"] = self.usuario_id
 
         dados.update(
             {
@@ -49,8 +53,9 @@ class Filme(Midia):
         duracao_minutos: int,
         genero: str = "Não informado",
         id: str | None = None,
+        usuario_id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id, usuario_id=usuario_id)
         self.diretor = diretor
         self.duracao_minutos = duracao_minutos
 
@@ -80,8 +85,9 @@ class Serie(Midia):
         episodio: int,
         genero: str = "Não informado",
         id: str | None = None,
+        usuario_id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id, usuario_id=usuario_id)
         self.temporada = temporada
         self.episodio = episodio
 
@@ -113,8 +119,9 @@ class Musica(Midia):
         duracao_segundos: int,
         genero: str = "Não informado",
         id: str | None = None,
+        usuario_id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id, usuario_id=usuario_id)
         self.artista = artista
         self.album = album
         self.duracao_segundos = duracao_segundos
@@ -146,8 +153,9 @@ class Video(Midia):
         duracao_minutos: int,
         genero: str = "Não informado",
         id: str | None = None,
+        usuario_id: str | None = None,
     ):
-        super().__init__(titulo, caminho_arquivo, ano, genero, id=id)
+        super().__init__(titulo, caminho_arquivo, ano, genero, id=id, usuario_id=usuario_id)
         self.canal_ou_autor = canal_ou_autor
         self.duracao_minutos = duracao_minutos
 
@@ -171,6 +179,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
     genero = dados.get("genero", "Não informado")
     # Se vier do MongoDB, converte o ObjectId (_id) para string; senão usa 'id' se existir
     id_midia = str(dados["_id"]) if "_id" in dados else dados.get("id")
+    usuario_id = dados.get("usuario_id")
 
     if tipo == "Filme":
         return Filme(
@@ -181,6 +190,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             duracao_minutos=dados["duracao_minutos"],
             genero=genero,
             id=id_midia,
+            usuario_id=usuario_id,
         )
     elif tipo == "Serie":
         return Serie(
@@ -191,6 +201,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             episodio=dados["episodio"],
             genero=genero,
             id=id_midia,
+            usuario_id=usuario_id,
         )
     elif tipo == "Musica":
         return Musica(
@@ -202,6 +213,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             duracao_segundos=dados["duracao_segundos"],
             genero=genero,
             id=id_midia,
+            usuario_id=usuario_id,
         )
     elif tipo == "Video":
         return Video(
@@ -212,6 +224,7 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             duracao_minutos=dados["duracao_minutos"],
             genero=genero,
             id=id_midia,
+            usuario_id=usuario_id,
         )
     else:
         return Midia(
@@ -220,5 +233,6 @@ def criar_midia_de_dicionario(dados: dict) -> Midia:
             ano=dados["ano"],
             genero=genero,
             id=id_midia,
+            usuario_id=usuario_id,
         )
 
